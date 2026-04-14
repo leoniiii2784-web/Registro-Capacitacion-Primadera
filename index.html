@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro Capacitación Primadera</title>
+    <style>
+        :root { --red: #9C1519; --grey: #605F5F; --light: #f4f4f4; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--light); padding: 15px; display: flex; justify-content: center; }
+        .card { max-width: 450px; width: 100%; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 6px solid var(--red); }
+        h2 { text-align: center; color: var(--red); margin-bottom: 15px; font-size: 1.3rem; }
+        label { display: block; margin-top: 15px; font-weight: bold; font-size: 0.8rem; color: #444; margin-bottom: 5px; }
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
+        
+        /* CARITAS UNIFORMES */
+        .rating-box { display: flex; justify-content: space-around; background: #fafafa; padding: 10px; border-radius: 10px; border: 1px solid #eee; }
+        .face { font-size: 2.2rem; cursor: pointer; color: #ccc; transition: 0.3s; filter: grayscale(1); }
+        .face.active { color: var(--red); filter: grayscale(0); transform: scale(1.2); }
+
+        /* BOTONES DE EFECTIVIDAD (NO PLANOS) */
+        .efectividad-group { display: flex; gap: 10px; margin-top: 5px; }
+        .btn-efect { flex: 1; padding: 12px 5px; border: 2px solid #eee; border-radius: 8px; background: white; cursor: pointer; font-size: 0.75rem; font-weight: bold; color: var(--grey); transition: 0.3s; text-align: center; }
+        .btn-efect.active[data-val="0"] { border-color: #ff4d4d; background: #fff5f5; color: #ff4d4d; }
+        .btn-efect.active[data-val="50"] { border-color: #ffcc00; background: #fffdf0; color: #997a00; }
+        .btn-efect.active[data-val="100"] { border-color: #28a745; background: #f0fff4; color: #28a745; }
+
+        .camera-container { width: 100%; min-height: 220px; background: #000; border-radius: 8px; margin-top: 15px; overflow: hidden; }
+        video, img { width: 100%; height: 220px; object-fit: cover; }
+        .btn-main { background: var(--red); color: white; width: 100%; padding: 18px; border: none; border-radius: 10px; cursor: pointer; margin-top: 25px; font-weight: bold; font-size: 1.1rem; }
+        .btn-main:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-group { display: flex; justify-content: space-between; margin-top: 10px; }
+        .btn-sec { background: var(--grey); color: white; padding: 12px; border: none; border-radius: 8px; width: 48%; font-size: 0.8rem; cursor: pointer; }
+        #status { text-align: center; margin-top: 10px; font-size: 0.8rem; color: var(--grey); font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Registro Primadera</h2>
+    
+    <label>Línea / Área</label>
+    <select id="linea">
+        <option value="Vecoplan">Vecoplan</option>
+        <option value="Hacker">Hacker</option>
+        <option value="Cargador">Cargador</option>
+        <option value="Molinos">Molinos</option>
+        <option value="Afilado">Afilado</option>
+        <option value="Secador">Secador</option>
+        <option value="Cocinas">Cocinas</option>
+        <option value="Ferrocontrol SHS">Ferrocontrol SHS</option>
+        <option value="Contiroll">Contiroll</option>
+        <option value="Finalizado">Finalizado</option>
+        <option value="Laminado 1">Laminado 1</option>
+        <option value="Laminado 2">Laminado 2</option>
+    </select>
+
+    <label>Colaborador / Código</label>
+    <div style="display: flex; gap: 5px;">
+        <input type="text" id="colaborador" style="flex: 2;" placeholder="Nombre">
+        <input type="text" id="codigo" style="flex: 1;" placeholder="ID">
+    </div>
+
+    <label>Instructor</label>
+    <input type="text" id="instructor" placeholder="Nombre formador">
+
+    <label>Tema / Procedimiento</label>
+    <textarea id="tema" rows="2" placeholder="¿Qué se enseñó?"></textarea>
+
+    <label>Tiempo (minutos)</label>
+    <input type="number" id="tiempo" placeholder="Ej: 45">
+
+    <label style="text-align: center;">¿Cómo calificas la capacitación?</label>
+    <div class="rating-box">
+        <span class="face" onclick="setRating(1, this)">😞</span>
+        <span class="face" onclick="setRating(3, this)">😐</span>
+        <span class="face active" onclick="setRating(5, this)">😊</span>
+    </div>
+
+    <label style="text-align: center;">¿Qué tan preparado estás?</label>
+    <div class="efectividad-group">
+        <button class="btn-efect" data-val="0" onclick="setEfect(0, this)">NECESITO<br>APOYO</button>
+        <button class="btn-efect" data-val="50" onclick="setEfect(50, this)">CON SUPE-<br>RVISIÓN</button>
+        <button class="btn-efect active" data-val="100" onclick="setEfect(100, this)" style="border-color: #28a745; background: #f0fff4; color: #28a745;">ESTOY<br>LISTO</button>
+    </div>
+
+    <div class="camera-container">
+        <video id="video" autoplay playsinline muted></video>
+        <img id="preview" style="display:none;">
+    </div>
+    
+    <div class="btn-group">
+        <button class="btn-sec" onclick="capturar()">📸 Tomar Foto</button>
+        <button class="btn-sec" onclick="document.getElementById('file').click()">📁 Galería</button>
+    </div>
+    <input type="file" id="file" accept="image/*" style="display:none;" onchange="cargarImagen(event)">
+
+    <button class="btn-main" id="btnEnviar" onclick="enviar()">GUARDAR REGISTRO</button>
+    <div id="status">Cámara activa</div>
+</div>
+
+<script>
+    const video = document.getElementById('video');
+    const preview = document.getElementById('preview');
+    const btnEnviar = document.getElementById('btnEnviar');
+    const statusText = document.getElementById('status');
+    let imagenB64 = "";
+    let satisfaccionVal = 5;
+    let efectividadVal = 100;
+
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbzjsG7DtSpNNCW8PNGIal0Ds3L4o2vKNexdtx5bfVKh7lN70ZbNVHkZ88BRNZnhtCPX/exec';
+
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+        .then(s => { video.srcObject = s; video.play(); });
+
+    function setRating(val, el) {
+        satisfaccionVal = val;
+        document.querySelectorAll('.face').forEach(f => f.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    function setEfect(val, el) {
+        efectividadVal = val;
+        document.querySelectorAll('.btn-efect').forEach(b => {
+            b.classList.remove('active');
+            b.style = ""; // Limpiar estilos manuales
+        });
+        el.classList.add('active');
+    }
+
+    function capturar() {
+        const c = document.createElement('canvas');
+        c.width = 640; c.height = 480;
+        c.getContext('2d').drawImage(video, 0, 0, 640, 480);
+        imagenB64 = c.toDataURL('image/jpeg', 0.5);
+        preview.src = imagenB64; preview.style.display = "block"; video.style.display = "none";
+        statusText.innerText = "Evidencia capturada.";
+    }
+
+    function cargarImagen(e) {
+        const r = new FileReader();
+        r.onload = () => { imagenB64 = r.result; preview.src = r.result; preview.style.display = "block"; video.style.display = "none"; };
+        r.readAsDataURL(e.target.files[0]);
+    }
+
+    async function enviar() {
+        const payload = {
+            fecha_manual: new Date().toLocaleString('es-CO'),
+            linea: document.getElementById('linea').value,
+            colaborador: document.getElementById('colaborador').value,
+            codigo: document.getElementById('codigo').value,
+            instructor: document.getElementById('instructor').value,
+            tema: document.getElementById('tema').value,
+            duracion_min: document.getElementById('tiempo').value,
+            satisfaccion: satisfaccionVal,
+            autonomia: efectividadVal,
+            imagenRaw: imagenB64
+        };
+
+        if(!payload.colaborador || !payload.tema) return alert("Faltan datos obligatorios.");
+
+        btnEnviar.disabled = true;
+        statusText.innerText = "Sincronizando con Excel...";
+
+        try {
+            await fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+            alert("✅ Registro guardado en la nube de Primadera.");
+            location.reload();
+        } catch (e) {
+            alert("Error de conexión.");
+            btnEnviar.disabled = false;
+        }
+    }
+</script>
+</body>
+</html>
