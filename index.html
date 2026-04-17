@@ -12,15 +12,15 @@
         label { display: block; margin-top: 15px; font-weight: bold; font-size: 0.8rem; color: #444; margin-bottom: 5px; }
         input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
         
+        /* Estilos Calificación Experiencia */
         .rating-box { display: flex; justify-content: space-around; background: #fafafa; padding: 10px; border-radius: 10px; border: 1px solid #eee; }
-        .face { font-size: 2.2rem; cursor: pointer; color: #ccc; transition: 0.3s; filter: grayscale(1); }
-        .face.active { color: var(--red); filter: grayscale(0); transform: scale(1.2); }
+        .face { font-size: 2.2rem; cursor: pointer; color: #ccc; transition: 0.3s; filter: grayscale(1); opacity: 0.5; }
+        .face.active { color: var(--red); filter: grayscale(0); transform: scale(1.2); opacity: 1; }
 
-        .efectividad-group { display: flex; gap: 10px; margin-top: 5px; }
-        .btn-efect { flex: 1; padding: 12px 5px; border: 2px solid #eee; border-radius: 8px; background: white; cursor: pointer; font-size: 0.75rem; font-weight: bold; color: var(--grey); transition: 0.3s; text-align: center; }
-        .btn-efect.active[data-val="0"] { border-color: #ff4d4d; background: #fff5f5; color: #ff4d4d; }
-        .btn-efect.active[data-val="50"] { border-color: #ffcc00; background: #fffdf0; color: #997a00; }
-        .btn-efect.active[data-val="100"] { border-color: #28a745; background: #f0fff4; color: #28a745; }
+        /* Estilos Autonomía (Semáforo) */
+        .efectividad-group { display: flex; flex-direction: column; gap: 8px; margin-top: 5px; }
+        .btn-efect { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 8px; background: white; cursor: pointer; font-size: 0.85rem; font-weight: bold; color: var(--grey); transition: 0.3s; text-align: left; }
+        .btn-efect.active { transform: translateX(5px); }
 
         .camera-container { width: 100%; min-height: 220px; background: #000; border-radius: 8px; margin-top: 15px; overflow: hidden; }
         video, img { width: 100%; height: 220px; object-fit: cover; }
@@ -50,16 +50,23 @@
         <option value="Finalizado">Finalizado</option>
         <option value="Laminado 1">Laminado 1</option>
         <option value="Laminado 2">Laminado 2</option>
+        <option value="Logistica">Logística</option>
+        <option value="Administrativo">Administrativo</option>
     </select>
 
-    <label>Nombre del Colaborador</label>
-    <input type="text" id="colaborador" placeholder="Nombre completo">
-
-    <label>Cédula de Ciudadanía</label>
-    <input type="text" id="codigo" placeholder="Número de documento">
+    <div style="display: flex; gap: 10px;">
+        <div style="flex: 2;">
+            <label>Colaborador</label>
+            <input type="text" id="colaborador" placeholder="Nombre completo">
+        </div>
+        <div style="flex: 1;">
+            <label>Cédula</label>
+            <input type="text" id="codigo" placeholder="Documento">
+        </div>
+    </div>
 
     <label>Instructor / Formador</label>
-    <input type="text" id="instructor" placeholder="Quién dicta la capacitación">
+    <input type="text" id="instructor" placeholder="Nombre del facilitador">
 
     <label>Tema de Capacitación</label>
     <textarea id="tema" rows="2" placeholder="Describa el tema tratado"></textarea>
@@ -67,18 +74,21 @@
     <label>Duración (minutos)</label>
     <input type="number" id="tiempo" placeholder="Ej: 30">
 
-    <label style="text-align: center;">¿Cómo calificas la capacitación?</label>
+    <label style="text-align: center; margin-top: 20px;">¿Cómo fue tu experiencia en la capacitación? (metodología, facilitador y espacio)</label>
     <div class="rating-box">
         <span class="face" onclick="setRating(1, this)">😞</span>
-        <span class="face" onclick="setRating(3, this)">😐</span>
-        <span class="face active" onclick="setRating(5, this)">😊</span>
+        <span class="face" onclick="setRating(2, this)">😐</span>
+        <span class="face" onclick="setRating(3, this)">🙂</span>
+        <span class="face" onclick="setRating(4, this)">😊</span>
+        <span class="face active" onclick="setRating(5, this)">🤩</span>
     </div>
 
-    <label style="text-align: center;">¿Qué tan preparado estás?</label>
+    <label style="text-align: center; margin-top: 20px;">¿Qué tan preparado te sientes para aplicar este conocimiento?</label>
     <div class="efectividad-group">
-        <button class="btn-efect" data-val="0" onclick="setEfect(0, this)">NECESITO APOYO</button>
-        <button class="btn-efect" data-val="50" onclick="setEfect(50, this)">CON SUPERVISIÓN</button>
-        <button class="btn-efect active" data-val="100" onclick="setEfect(100, this)" style="border-color: #28a745; background: #f0fff4; color: #28a745;">ESTOY LISTO</button>
+        <button type="button" class="btn-efect" data-val="1" onclick="setEfect(1, this)">Aún no me siento preparado</button>
+        <button type="button" class="btn-efect" data-val="2" onclick="setEfect(2, this)">Necesito apoyo para aplicarlo</button>
+        <button type="button" class="btn-efect" data-val="3" onclick="setEfect(3, this)">Puedo aplicarlo con supervisión</button>
+        <button type="button" class="btn-efect active" data-val="4" onclick="setEfect(4, this)" id="btnListoDef">Puedo aplicarlo de forma autónoma</button>
     </div>
 
     <div class="camera-container">
@@ -105,7 +115,7 @@
     
     let imagenB64 = "";
     let satisfaccionVal = 5;
-    let efectividadVal = 100;
+    let efectividadVal = 4;
 
     navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
         .then(s => { video.srcObject = s; video.play(); })
@@ -124,21 +134,29 @@
             b.style = ""; 
         });
         el.classList.add('active');
+        // Estilos visuales rápidos de semáforo
+        if(val === 1) { el.style.borderColor = "#9C1519"; el.style.background = "#fff5f5"; el.style.color = "#9C1519"; }
+        if(val === 2) { el.style.borderColor = "#ffcc00"; el.style.background = "#fffdf0"; el.style.color = "#856404"; }
+        if(val === 3) { el.style.borderColor = "#28a745"; el.style.background = "#f0fff4"; el.style.color = "#28a745"; }
+        if(val === 4) { el.style.borderColor = "#16a34a"; el.style.background = "#16a34a"; el.style.color = "white"; }
     }
+
+    // Inicializar el botón por defecto visualmente
+    setEfect(4, document.getElementById('btnListoDef'));
 
     function capturar() {
         const c = document.createElement('canvas');
         c.width = 640; c.height = 480;
         c.getContext('2d').drawImage(video, 0, 0, 640, 480);
-        imagenB64 = c.toDataURL('image/jpeg', 0.5);
-        preview.src = imagenB64; preview.style.display = "block"; video.style.display = "none";
+        imagenB64 = c.toDataURL('image/jpeg', 0.5).split(',')[1];
+        preview.src = c.toDataURL('image/jpeg'); preview.style.display = "block"; video.style.display = "none";
         statusText.innerText = "Evidencia capturada.";
     }
 
     function cargarImagen(e) {
         const r = new FileReader();
         r.onload = () => { 
-            imagenB64 = r.result; 
+            imagenB64 = r.result.split(',')[1]; 
             preview.src = r.result; 
             preview.style.display = "block"; 
             video.style.display = "none"; 
@@ -148,7 +166,6 @@
 
     async function enviar() {
         const payload = {
-            fecha_manual: new Date().toLocaleString('es-CO'),
             linea: document.getElementById('linea').value,
             colaborador: document.getElementById('colaborador').value,
             cedula: document.getElementById('codigo').value,
@@ -157,7 +174,8 @@
             duracion_min: document.getElementById('tiempo').value,
             satisfaccion: satisfaccionVal,
             autonomia: efectividadVal,
-            imagenRaw: imagenB64
+            archivoContenido: imagenB64,
+            archivoNombre: `Foto_${document.getElementById('codigo').value}_${Date.now()}.jpg`
         };
 
         if(!payload.colaborador || !payload.cedula || !payload.tema || !imagenB64) {
