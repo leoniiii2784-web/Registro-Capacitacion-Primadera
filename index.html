@@ -11,6 +11,7 @@
         h2 { text-align: center; color: var(--red); margin-bottom: 15px; font-size: 1.3rem; }
         label { display: block; margin-top: 15px; font-weight: bold; font-size: 0.8rem; color: #444; margin-bottom: 5px; }
         input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
+        select:disabled { background: #eee; cursor: not-allowed; }
         
         /* Estilos Calificación Experiencia */
         .rating-box { display: flex; justify-content: space-around; background: #fafafa; padding: 10px; border-radius: 10px; border: 1px solid #eee; }
@@ -22,7 +23,8 @@
         .btn-efect { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 8px; background: white; cursor: pointer; font-size: 0.85rem; font-weight: bold; color: var(--grey); transition: 0.3s; text-align: left; }
         .btn-efect.active { transform: translateX(5px); }
 
-        .camera-container { width: 100%; min-height: 220px; background: #000; border-radius: 8px; margin-top: 15px; overflow: hidden; }
+        /* Contenedor de Evidencia */
+        .camera-container { width: 100%; min-height: 220px; background: #000; border-radius: 8px; margin-top: 5px; overflow: hidden; }
         video, img { width: 100%; height: 220px; object-fit: cover; }
         .btn-main { background: var(--red); color: white; width: 100%; padding: 18px; border: none; border-radius: 10px; cursor: pointer; margin-top: 25px; font-weight: bold; font-size: 1.1rem; }
         .btn-main:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -36,22 +38,23 @@
 <div class="card">
     <h2>Registro Primadera</h2>
     
-    <label>Línea / Área</label>
-    <select id="linea">
-        <option value="Vecoplan">Vecoplan</option>
-        <option value="Hacker">Hacker</option>
-        <option value="Cargador">Cargador</option>
-        <option value="Molinos">Molinos</option>
-        <option value="Afilado">Afilado</option>
-        <option value="Secador">Secador</option>
-        <option value="Cocinas">Cocinas</option>
-        <option value="Ferrocontrol SHS">Ferrocontrol SHS</option>
-        <option value="Contiroll">Contiroll</option>
-        <option value="Finalizado">Finalizado</option>
-        <option value="Laminado 1">Laminado 1</option>
-        <option value="Laminado 2">Laminado 2</option>
-        <option value="Logistica">Logística</option>
-        <option value="Administrativo">Administrativo</option>
+    <label>Área Principal</label>
+    <select id="areaPrincipal" onchange="actualizarSubAreas()">
+        <option value="">Seleccione un área...</option>
+        <option value="Gestión Humana">Gestión Humana</option>
+        <option value="Supply Chain">Supply Chain</option>
+        <option value="Financiera">Financiera</option>
+        <option value="EHS">EHS</option>
+        <option value="Mantenimiento">Mantenimiento</option>
+        <option value="Lignus">Lignus</option>
+        <option value="Técnica">Técnica</option>
+        <option value="Comercial & Mercadeo">Comercial & Mercadeo</option>
+        <option value="Producción">Producción</option>
+    </select>
+
+    <label>Sub-Área / Línea</label>
+    <select id="subArea" disabled>
+        <option value="">Seleccione primero el área...</option>
     </select>
 
     <div style="display: flex; gap: 10px;">
@@ -91,6 +94,7 @@
         <button type="button" class="btn-efect active" data-val="4" onclick="setEfect(4, this)" id="btnListoDef">Puedo aplicarlo de forma autónoma</button>
     </div>
 
+    <label style="text-align: center; margin-top: 25px; color: var(--red); font-size: 0.9rem;">Deja tu evidencia de participación</label>
     <div class="camera-container">
         <video id="video" autoplay playsinline muted></video>
         <img id="preview" style="display:none;">
@@ -116,6 +120,41 @@
     let imagenB64 = "";
     let satisfaccionVal = 5;
     let efectividadVal = 4;
+
+    const matrizAreas = {
+        "Gestión Humana": ["Gestión Humana"],
+        "Supply Chain": ["Logística y Almacen", "SAC", "Planeación", "Supply Chain"],
+        "Financiera": ["Compras y Comex", "Contabilidad/Impuestos", "Control Interno", "Planeación Financiera/Costos", "Tesoreria/Cartera", "TI", "Financiera"],
+        "EHS": ["EHS"],
+        "Mantenimiento": ["Eléctrico", "Mecanico", "Proyectos", "Administrativo"],
+        "Lignus": ["Silvicultura", "Cosechas", "Administrativo"],
+        "Técnica": ["Técnica"],
+        "Comercial & Mercadeo": ["Comercial", "Mercadeo"],
+        "Producción": ["Vecoplan", "Hacker", "Cargador", "Molinos", "Afilado", "Secador", "Cocinas", "Ferrocontrol SHS", "Contiroll", "Finalizado", "Laminado 1", "Laminado 2", "Administrativo"]
+    };
+
+    function actualizarSubAreas() {
+        const areaSel = document.getElementById('areaPrincipal').value;
+        const subAreaSelect = document.getElementById('subArea');
+        
+        subAreaSelect.innerHTML = "";
+        
+        if (!areaSel) {
+            subAreaSelect.innerHTML = '<option value="">Seleccione primero el área...</option>';
+            subAreaSelect.disabled = true;
+            return;
+        }
+        
+        subAreaSelect.disabled = false;
+        const opciones = matrizAreas[areaSel];
+        
+        opciones.forEach(sub => {
+            const opt = document.createElement('option');
+            opt.value = sub;
+            opt.textContent = sub;
+            subAreaSelect.appendChild(opt);
+        });
+    }
 
     navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
         .then(s => { video.srcObject = s; video.play(); })
@@ -146,7 +185,7 @@
         const c = document.createElement('canvas');
         c.width = 640; c.height = 480;
         c.getContext('2d').drawImage(video, 0, 0, 640, 480);
-        imagenB64 = c.toDataURL('image/jpeg', 0.5); // Enviamos el DataURI completo para que la fórmula del flujo funcione
+        imagenB64 = c.toDataURL('image/jpeg', 0.5);
         preview.src = imagenB64; preview.style.display = "block"; video.style.display = "none";
         statusText.innerText = "Evidencia capturada.";
     }
@@ -163,9 +202,11 @@
     }
 
     async function enviar() {
+        const subAreaVal = document.getElementById('subArea').value;
+
         const payload = {
             fecha_manual: new Date().toLocaleString('es-CO'),
-            linea: document.getElementById('linea').value,
+            linea: subAreaVal,
             colaborador: document.getElementById('colaborador').value,
             cedula: document.getElementById('codigo').value,
             instructor: document.getElementById('instructor').value,
@@ -173,11 +214,11 @@
             duracion_min: document.getElementById('tiempo').value,
             satisfaccion: satisfaccionVal,
             autonomia: efectividadVal,
-            imagenRaw: imagenB64 // Nombre exacto que busca tu Power Automate
+            imagenRaw: imagenB64
         };
 
-        if(!payload.colaborador || !payload.cedula || !payload.tema || !imagenB64) {
-            return alert("Por favor completa nombre, cédula, tema y evidencia fotográfica.");
+        if(!document.getElementById('areaPrincipal').value || !subAreaVal || !payload.colaborador || !payload.cedula || !payload.tema || !imagenB64) {
+            return alert("Por favor completa las áreas, nombre, cédula, tema y evidencia fotográfica.");
         }
 
         btnEnviar.disabled = true;
