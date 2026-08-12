@@ -218,8 +218,9 @@
 
     function capturar() {
         const c = document.createElement('canvas');
-        c.width = 640; c.height = 480;
-        c.getContext('2d').drawImage(video, 0, 0, 640, 480);
+        c.width = video.videoWidth;
+        c.height = video.videoHeight;
+        c.getContext('2d').drawImage(video, 0, 0, c.width, c.height);
         imagenB64 = c.toDataURL('image/jpeg', 0.5);
         preview.src = imagenB64; preview.style.display = "block"; video.style.display = "none";
         document.getElementById('btnFlip').style.display = "none";
