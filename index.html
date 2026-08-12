@@ -24,12 +24,13 @@
         .btn-efect.active { transform: translateX(5px); }
 
         /* Contenedor de Evidencia */
-        .camera-container { width: 100%; min-height: 220px; background: #000; border-radius: 8px; margin-top: 5px; overflow: hidden; }
+        .camera-container { position: relative; width: 100%; min-height: 220px; background: #000; border-radius: 8px; margin-top: 5px; overflow: hidden; }
         video, img { width: 100%; height: 220px; object-fit: cover; }
         .btn-main { background: var(--red); color: white; width: 100%; padding: 18px; border: none; border-radius: 10px; cursor: pointer; margin-top: 25px; font-weight: bold; font-size: 1.1rem; }
         .btn-main:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-group { display: flex; justify-content: space-between; margin-top: 10px; }
         .btn-sec { background: var(--grey); color: white; padding: 12px; border: none; border-radius: 8px; width: 48%; font-size: 0.8rem; cursor: pointer; }
+        .btn-flip { position: absolute; top: 8px; right: 8px; display: flex; align-items: center; gap: 5px; background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 20px; padding: 7px 12px; font-size: 0.75rem; font-weight: bold; cursor: pointer; }
         #status { text-align: center; margin-top: 10px; font-size: 0.8rem; color: var(--grey); font-weight: bold; }
     </style>
 </head>
@@ -94,10 +95,11 @@
         <button type="button" class="btn-efect active" data-val="4" onclick="setEfect(4, this)" id="btnListoDef">Puedo aplicarlo de forma autónoma</button>
     </div>
 
-    <label style="text-align: center; margin-top: 25px; color: var(--red); font-size: 0.9rem;">Deja tu evidencia de participación</label>
+    <label style="text-align: center; margin-top: 25px; color: var(--red); font-size: 0.9rem;">Evidencia: foto realizando la actividad, máquina o capacitación</label>
     <div class="camera-container">
         <video id="video" autoplay playsinline muted></video>
         <img id="preview" style="display:none;">
+        <button class="btn-flip" id="btnFlip" onclick="cambiarCamara()" title="Cambiar cámara">🔄 Cambiar cámara</button>
     </div>
     
     <div class="btn-group">
@@ -156,9 +158,24 @@
         });
     }
 
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-        .then(s => { video.srcObject = s; video.play(); })
-        .catch(err => { statusText.innerText = "Error: Acceso a cámara denegado."; });
+    let facingActual = "environment";
+    let streamActual = null;
+
+    function iniciarCamara(facing) {
+        if (streamActual) {
+            streamActual.getTracks().forEach(t => t.stop());
+        }
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: facing } })
+            .then(s => { streamActual = s; video.srcObject = s; video.play(); statusText.innerText = "Cámara activa"; })
+            .catch(err => { statusText.innerText = "Error: Acceso a cámara denegado."; });
+    }
+
+    function cambiarCamara() {
+        facingActual = (facingActual === "environment") ? "user" : "environment";
+        iniciarCamara(facingActual);
+    }
+
+    iniciarCamara(facingActual);
 
     function setRating(val, el) {
         satisfaccionVal = val;
@@ -187,6 +204,7 @@
         c.getContext('2d').drawImage(video, 0, 0, 640, 480);
         imagenB64 = c.toDataURL('image/jpeg', 0.5);
         preview.src = imagenB64; preview.style.display = "block"; video.style.display = "none";
+        document.getElementById('btnFlip').style.display = "none";
         statusText.innerText = "Evidencia capturada.";
     }
 
@@ -197,6 +215,7 @@
             preview.src = r.result; 
             preview.style.display = "block"; 
             video.style.display = "none"; 
+            document.getElementById('btnFlip').style.display = "none";
         };
         r.readAsDataURL(e.target.files[0]);
     }
