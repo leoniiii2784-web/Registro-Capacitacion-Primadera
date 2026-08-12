@@ -31,6 +31,7 @@
         .btn-group { display: flex; justify-content: space-between; margin-top: 10px; }
         .btn-sec { background: var(--grey); color: white; padding: 12px; border: none; border-radius: 8px; width: 48%; font-size: 0.8rem; cursor: pointer; }
         .btn-flip { position: absolute; top: 8px; right: 8px; display: flex; align-items: center; gap: 5px; background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 20px; padding: 7px 12px; font-size: 0.75rem; font-weight: bold; cursor: pointer; }
+        .btn-flip:disabled { opacity: 0.5; cursor: not-allowed; }
         #status { text-align: center; margin-top: 10px; font-size: 0.8rem; color: var(--grey); font-weight: bold; }
     </style>
 </head>
@@ -160,17 +161,34 @@
 
     let facingActual = "environment";
     let streamActual = null;
+    let cambiandoCamara = false;
 
     function iniciarCamara(facing) {
         if (streamActual) {
             streamActual.getTracks().forEach(t => t.stop());
+            streamActual = null;
         }
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: facing } })
-            .then(s => { streamActual = s; video.srcObject = s; video.play(); statusText.innerText = "Cámara activa"; })
-            .catch(err => { statusText.innerText = "Error: Acceso a cámara denegado."; });
+        statusText.innerText = "Cambiando cámara...";
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: 640 }, height: { ideal: 360 } } })
+            .then(s => {
+                streamActual = s;
+                video.srcObject = s;
+                video.play();
+                statusText.innerText = "Cámara activa";
+                cambiandoCamara = false;
+                document.getElementById('btnFlip').disabled = false;
+            })
+            .catch(err => {
+                statusText.innerText = "Error: Acceso a cámara denegado.";
+                cambiandoCamara = false;
+                document.getElementById('btnFlip').disabled = false;
+            });
     }
 
     function cambiarCamara() {
+        if (cambiandoCamara) return;
+        cambiandoCamara = true;
+        document.getElementById('btnFlip').disabled = true;
         facingActual = (facingActual === "environment") ? "user" : "environment";
         iniciarCamara(facingActual);
     }
